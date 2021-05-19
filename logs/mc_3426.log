@@ -1,0 +1,102 @@
+[19:52:01] [Realms Notification Availability checker #1/INFO]: Could not authorize you against Realms server: Invalid session id
+[19:53:02] [EnvServerSocketHandler/INFO]: [STDOUT]: Received from 127.0.0.1:<MissionInit xmlns="http://ProjectMalmo.microsoft.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SchemaVersion="" PlatformVersion="0.37.0">
+                                <Mission>
+    <About>
+        <Summary>MineRLObtainDiamond-v0</Summary>
+    </About>
+
+    <ModSettings>
+        <MsPerTick>50</MsPerTick>
+    </ModSettings>
+
+    <ServerSection>
+        <ServerInitialConditions>
+            <Time>
+                <StartTime>6000</StartTime>
+            </Time>
+            <AllowSpawning>true</AllowSpawning>
+            
+        </ServerInitialConditions>
+        <ServerHandlers>
+            <DefaultWorldGenerator forceReset="true"/>
+            <ServerQuitFromTimeUp timeLimitMs="900000" description="out_of_time"/>
+            <ServerQuitWhenAnyAgentFinishes/>
+        </ServerHandlers>
+    </ServerSection>
+
+    <AgentSection mode="Survival">
+        <Name>MalmoTutorialBot</Name>
+        <AgentStart/>
+        <AgentHandlers>
+            <!--  Observations     -->
+            <VideoProducer want_de
+[19:53:03] [EnvServerSocketHandler/INFO]: [STDOUT]: REPLYING WITH: MALMOOK
+[19:53:03] [Client thread/INFO]: [STDOUT]: Mission received: MineRLObtainDiamond-v0
+[19:53:03] [Client thread/INFO]: [STDOUT]: CLIENT request state: CREATING_HANDLERS
+[19:53:03] [Client thread/INFO]: [STDOUT]: CLIENT enter state: CREATING_HANDLERS
+[19:53:03] [Client thread/INFO]: [STDOUT]: Starting command server.
+[19:53:03] [Thread-11/INFO]: [STDOUT]: INFO: ->com(0) Listening for messages on port 10123
+[19:53:04] [Client thread/INFO]: [STDOUT]: CLIENT request state: EVALUATING_WORLD_REQUIREMENTS
+[19:53:04] [Client thread/INFO]: [STDOUT]: CLIENT enter state: EVALUATING_WORLD_REQUIREMENTS
+[19:53:04] [Client thread/INFO]: [STDOUT]: CLIENT request state: CREATING_NEW_WORLD
+[19:53:04] [Client thread/INFO]: [STDOUT]: CLIENT enter state: CREATING_NEW_WORLD
+[19:53:05] [Client thread/INFO]: Mixing MixinWorldProviderSpawn from mixins.overclocking.malmomod.json into net.minecraft.world.WorldProvider
+[19:53:05] [Decompiler thread/INFO]: Decompiling net/minecraft/world/WorldProvider
+[19:53:05] [Decompiler thread/INFO]: Writing C:\Users\KukJinKim\AppData\Local\Temp\tmpniam46l7\Minecraft\run\.mixin.out\java\net\minecraft\world\WorldProvider.java
+[19:53:05] [Server thread/INFO]: Starting integrated minecraft server version 1.11.2
+[19:53:05] [Server thread/INFO]: Generating keypair
+[19:53:05] [Server thread/INFO]: Injecting existing block and item data into this server instance
+[19:53:05] [Server thread/INFO]: Applying holder lookups
+[19:53:05] [Server thread/INFO]: Holder lookups applied
+[19:53:05] [Server thread/INFO]: Loading dimension 0 (TEMP_0_1c840e2a-703f-4fc8-862b-f41fa09bcada) (net.minecraft.server.integrated.IntegratedServer@30e35837)
+[19:53:06] [Server thread/INFO]: Loading dimension 1 (TEMP_0_1c840e2a-703f-4fc8-862b-f41fa09bcada) (net.minecraft.server.integrated.IntegratedServer@30e35837)
+[19:53:06] [Server thread/INFO]: Loading dimension -1 (TEMP_0_1c840e2a-703f-4fc8-862b-f41fa09bcada) (net.minecraft.server.integrated.IntegratedServer@30e35837)
+[19:53:06] [Server thread/INFO]: Preparing start region for level 0
+[19:53:07] [Server thread/INFO]: Preparing spawn area: 11%
+[19:53:08] [Server thread/INFO]: Preparing spawn area: 28%
+[19:53:09] [Server thread/INFO]: Preparing spawn area: 45%
+[19:53:10] [Server thread/INFO]: Preparing spawn area: 60%
+[19:53:11] [Server thread/INFO]: Preparing spawn area: 76%
+[19:53:12] [Server thread/INFO]: Preparing spawn area: 94%
+[19:53:12] [Server thread/INFO]: Changing view distance to 4, from 10
+[19:53:14] [Netty Local Client IO #0/INFO]: [STDOUT]: Transformed Name: net.minecraft.client.entity.EntityOtherPlayerMP
+[19:53:14] [Netty Local Client IO #0/INFO]: [STDOUT]: MALMO: Attempting to transform MinecraftServer
+[19:53:14] [Netty Local Client IO #0/INFO]: [STDOUT]: MALMO: Found EntityOtherPlayerMP, attempting to transform it
+[19:53:14] [Server thread/INFO]: [STDOUT]: SERVER request state: WAITING_FOR_MOD_READY
+[19:53:14] [Server thread/INFO]: [STDOUT]: CLIENT request state: WAITING_FOR_SERVER_READY
+[19:53:14] [Server thread/INFO]: [STDOUT]: SERVER enter state: WAITING_FOR_MOD_READY
+[19:53:14] [Netty Local Client IO #0/INFO]: Server protocol version 2
+[19:53:14] [Netty Server IO #1/INFO]: Client protocol version 2
+[19:53:14] [Server thread/INFO]: [STDOUT]: SERVER request state: DORMANT
+[19:53:14] [Server thread/INFO]: [STDOUT]: SERVER enter state: DORMANT
+[19:53:14] [Netty Server IO #1/INFO]: Client attempting to join with 5 mods : minecraft@1.11.2,FML@8.0.99.99,malmomod@0.37.0,forge@13.20.1.2588,mcp@9.19
+[19:53:14] [Server thread/INFO]: [STDOUT]: INCOMING MISSION: Received MissionInit directly through ServerStateMachine constructor.
+[19:53:14] [Server thread/INFO]: [STDOUT]: Mission received: MineRLObtainDiamond-v0
+[19:53:14] [Server thread/INFO]: Received mission: ¡×9MineRLObtainDiamond-v0
+[19:53:14] [Server thread/INFO]: Source: ¡×a127.0.0.1
+[19:53:14] [Server thread/INFO]: [STDOUT]: SERVER request state: BUILDING_WORLD
+[19:53:14] [Server thread/INFO]: [STDOUT]: SERVER enter state: BUILDING_WORLD
+[19:53:14] [Server thread/INFO]: [STDOUT]: SERVER request state: WAITING_FOR_AGENTS_TO_ASSEMBLE
+[19:53:14] [Netty Local Client IO #0/INFO]: [Netty Local Client IO #0] Client side modded connection established
+[19:53:14] [Server thread/INFO]: [Server thread] Server side modded connection established
+[19:53:14] [Server thread/INFO]: MalmoTutorialBot[local:E:ebea7021] logged in with entity id 2321 at (14.5, 72.0, 68.5)
+[19:53:14] [Server thread/INFO]: MalmoTutorialBot joined the game
+[19:53:14] [Server thread/INFO]: [STDOUT]: SERVER enter state: WAITING_FOR_AGENTS_TO_ASSEMBLE
+[19:53:14] [Server thread/INFO]: [STDOUT]: Experiment requires: 
+[19:53:14] [Server thread/INFO]: [STDOUT]: >>>> MalmoTutorialBot
+[19:53:15] [Server thread/INFO]: Saving and pausing game...
+[19:53:15] [Server thread/INFO]: Saving chunks for level 'TEMP_0_1c840e2a-703f-4fc8-862b-f41fa09bcada'/Overworld
+[19:53:15] [Client thread/INFO]: [STDOUT]: CLIENT enter state: WAITING_FOR_SERVER_READY
+[19:53:15] [Client thread/INFO]: [STDOUT]: ***Telling server we are ready - MalmoTutorialBot
+[19:53:15] [Client thread/INFO]: [STDOUT]: ***Telling server we are ready - MalmoTutorialBot
+[19:53:15] [Client thread/INFO]: [STDOUT]: ***Telling server we are ready - MalmoTutorialBot
+[19:53:15] [Client thread/INFO]: [STDOUT]: ***Telling server we are ready - MalmoTutorialBot
+[19:53:16] [Server thread/INFO]: Saving chunks for level 'TEMP_0_1c840e2a-703f-4fc8-862b-f41fa09bcada'/Nether
+[19:53:16] [Server thread/INFO]: Saving chunks for level 'TEMP_0_1c840e2a-703f-4fc8-862b-f41fa09bcada'/The End
+[19:53:16] [Client thread/INFO]: [STDOUT]: CLIENT request state: RUNNING
+[19:53:16] [Client thread/INFO]: [STDOUT]: CLIENT enter state: RUNNING
+[19:53:16] [Server thread/INFO]: [STDOUT]: SERVER request state: RUNNING
+[19:53:16] [Server thread/INFO]: [STDOUT]: SERVER enter state: RUNNING
+[19:53:16] [Client thread/INFO]: [STDOUT]: Resized the window
+[19:53:16] [Client thread/INFO]: [STDOUT]: Unpausing
+[19:53:16] [Client thread/INFO]: [CHAT] ¡×l900...

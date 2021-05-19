@@ -1,0 +1,16 @@
+[19:59:19] [Realms Notification Availability checker #1/INFO]: Could not authorize you against Realms server: Invalid session id
+[20:05:18] [Client thread/INFO]: Stopping!
+[20:05:18] [Client thread/INFO]: SoundSystem shutting down...
+[20:05:18] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+java.lang.NullPointerException (no error message)
+
+* Try:
+Run with --stacktrace option to get the stack trace. Run with --info or --debug option to get more log output.
+
+BUILD FAILED
+
+Total time: 6 mins 47.213 secs

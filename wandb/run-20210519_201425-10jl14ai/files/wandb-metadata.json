@@ -1,0 +1,21 @@
+{
+    "os": "Linux-5.8.0-53-generic-x86_64-with-debian-bullseye-sid",
+    "python": "3.7.9",
+    "heartbeatAt": "2021-05-19T11:14:26.171962",
+    "startedAt": "2021-05-19T11:14:25.324370",
+    "docker": null,
+    "gpu": "GeForce RTX 2070 SUPER",
+    "gpu_count": 1,
+    "cpu_count": 12,
+    "cuda": null,
+    "args": [
+        "-f",
+        "/home/kukjin/.local/share/jupyter/runtime/kernel-458a0b4f-1cef-4912-a473-acae35270852.json"
+    ],
+    "state": "running",
+    "program": "Study/RL/\uc18c\ud504\ud2b8\uc6e8\uc5b4 \uc735\ud569 \ucea1\uc2a4\ud1a4 \ub514\uc790\uc778/ApexDQFD/ApexDQFD.ipynb",
+    "root": "/home/kukjin",
+    "host": "kukjin-System-Product-Name",
+    "username": "kukjin",
+    "executable": "/home/kukjin/anaconda3/envs/minerl/bin/python"
+}

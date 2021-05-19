@@ -1,0 +1,227 @@
+pre_train start
+  0%|                                                                                                                                       | 0/209 [00:00<?, ?it/s]100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 209/209 [00:00<00:00, 16076.91it/s]
+2021-05-12 17:29:51,031	INFO services.py:1092 -- View the Ray dashboard at [1m[32mhttp://127.0.0.1:8265[39m[22m
+2021-05-12 17:29:55,068	WARNING worker.py:1091 -- The dashboard on node DESKTOP-ESV82HP failed with the following error:
+Traceback (most recent call last):
+  File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\dashboard\dashboard.py", line 962, in <module>
+    metrics_export_address=metrics_export_address)
+  File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\dashboard\dashboard.py", line 512, in __init__
+    build_dir = setup_static_dir(self.app)
+  File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\dashboard\dashboard.py", line 411, in setup_static_dir
+    "&& npm run build)", build_dir)
+FileNotFoundError: [Errno 2] Dashboard build directory not found. If installing from source, please follow the additional steps required to build the dashboard(cd python/ray/dashboard/client && npm ci && npm run build): 'c:\\users\\kukjinkim\\anaconda3\\envs\\minerl\\lib\\site-packages\\ray\\dashboard\\client/build'
+
+[2m[36m(pid=47728)[0m c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\logger.py:30: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+[2m[36m(pid=47728)[0m   warnings.warn(colorize('%s: %s'%('WARN', msg % args), 'yellow'))
+[2m[36m(pid=59384)[0m c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\logger.py:30: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+[2m[36m(pid=59384)[0m   warnings.warn(colorize('%s: %s'%('WARN', msg % args), 'yellow'))
+[2m[36m(pid=51044)[0m c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\logger.py:30: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+[2m[36m(pid=51044)[0m   warnings.warn(colorize('%s: %s'%('WARN', msg % args), 'yellow'))
+[2m[36m(pid=51044)[0m Traceback (most recent call last):
+[2m[36m(pid=51044)[0m   File "python\ray\_raylet.pyx", line 477, in ray._raylet.execute_task
+[2m[36m(pid=51044)[0m   File "python\ray\_raylet.pyx", line 481, in ray._raylet.execute_task
+[2m[36m(pid=51044)[0m   File "python\ray\_raylet.pyx", line 482, in ray._raylet.execute_task
+[2m[36m(pid=51044)[0m   File "<ipython-input-21-161ecb96966f>", line 5, in make_env
+[2m[36m(pid=51044)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\envs\registration.py", line 145, in make
+[2m[36m(pid=51044)[0m     return registry.make(id, **kwargs)
+[2m[36m(pid=51044)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\envs\registration.py", line 90, in make
+[2m[36m(pid=51044)[0m     env = spec.make(**kwargs)
+[2m[36m(pid=51044)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\envs\registration.py", line 60, in make
+[2m[36m(pid=51044)[0m     env = cls(**_kwargs)
+[2m[36m(pid=51044)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\minerl\env\core.py", line 137, in __init__
+[2m[36m(pid=51044)[0m     self.instance = self._get_new_instance(port)
+[2m[36m(pid=51044)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\minerl\env\core.py", line 159, in _get_new_instance
+[2m[36m(pid=51044)[0m     instance.launch()
+[2m[36m(pid=51044)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\minerl\env\malmo.py", line 512, in launch
+[2m[36m(pid=51044)[0m     raise EOFError(error_str + "\n\nMinecraft process finished unexpectedly. There was an error with Malmo.")
+[2m[36m(pid=51044)[0m EOFError: 다른 프로세스가 파일을 사용 중이기 때문에 프로세스가 액세스 할 수 없습니다.
+[2m[36m(pid=51044)[0m This mapping 'snapshot_20161220' was designed for MC 1.11! Use at your own peril.
+[2m[36m(pid=51044)[0m WARNING: You are using an unsupported version of ForgeGradle.
+[2m[36m(pid=51044)[0m Please consider upgrading to ForgeGradle 4 and helping in the efforts to get old versions working on the modern toolchain.
+[2m[36m(pid=51044)[0m See https://gist.github.com/TheCurle/fe7ad3ede188cbdd15c235cc75d52d4a for more info on contributing.
+[2m[36m(pid=51044)[0m #################################################
+[2m[36m(pid=51044)[0m          ForgeGradle 2.2.1-g5be7818        
+[2m[36m(pid=51044)[0m   https://github.com/MinecraftForge/ForgeGradle  
+[2m[36m(pid=51044)[0m #################################################
+[2m[36m(pid=51044)[0m                Powered by MCP unknown               
+[2m[36m(pid=51044)[0m              http://modcoderpack.com             
+[2m[36m(pid=51044)[0m          by: Searge, ProfMobius, Fesh0r,         
+[2m[36m(pid=51044)[0m          R4wk, ZeuX, IngisKahn, bspkrs           
+[2m[36m(pid=51044)[0m #################################################
+[2m[36m(pid=51044)[0m Found AccessTransformer: malmomod_at.cfg
+[2m[36m(pid=51044)[0m :deobfCompileDummyTask
+[2m[36m(pid=51044)[0m :deobfProvidedDummyTask
+[2m[36m(pid=51044)[0m :getVersionJson
+[2m[36m(pid=51044)[0m :extractUserdev UP-TO-DATE
+[2m[36m(pid=51044)[0m :downloadClient SKIPPED
+[2m[36m(pid=51044)[0m :downloadServer SKIPPED
+[2m[36m(pid=51044)[0m :splitServerJar SKIPPED
+[2m[36m(pid=51044)[0m :mergeJars SKIPPED
+[2m[36m(pid=51044)[0m :applyBinaryPatches SKIPPED
+[2m[36m(pid=51044)[0m :extractDependencyATs SKIPPED
+[2m[36m(pid=51044)[0m :extractMcpData SKIPPED
+[2m[36m(pid=51044)[0m :extractMcpMappings SKIPPED
+[2m[36m(pid=51044)[0m :genSrgs SKIPPED
+[2m[36m(pid=51044)[0m :deobfMcMCP UP-TO-DATE
+[2m[36m(pid=51044)[0m :sourceApiJava UP-TO-DATE
+[2m[36m(pid=51044)[0m :compileApiJava UP-TO-DATE
+[2m[36m(pid=51044)[0m :processApiResources UP-TO-DATE
+[2m[36m(pid=51044)[0m :apiClasses UP-TO-DATE
+[2m[36m(pid=51044)[0m :copyModToClient UP-TO-DATE
+[2m[36m(pid=51044)[0m :copyModToServer UP-TO-DATE
+[2m[36m(pid=51044)[0m :copySrg UP-TO-DATE
+[2m[36m(pid=51044)[0m :deleteSchemas
+[2m[36m(pid=51044)[0m :copySchemas
+[2m[36m(pid=51044)[0m :jaxb UP-TO-DATE
+[2m[36m(pid=51044)[0m :sourceMainJava UP-TO-DATE
+[2m[36m(pid=51044)[0m :compileJava
+[2m[36m(pid=51044)[0m FAILURE: Build failed with an exception.
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m * What went wrong:
+[2m[36m(pid=51044)[0m Failed to capture snapshot of input files for task 'compileJava' during up-to-date check.
+[2m[36m(pid=51044)[0m > java.io.FileNotFoundException: C:\Users\KukJinKim\Anaconda3\envs\minerl\Lib\site-packages\minerl\env\Malmo\Minecraft\.gradle\minecraft\forgeBin-1.11.2-13.20.0.2228-PROJECT(Minecraft).jar (지정된 파일을 찾을 수 없습니다)
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m * Try:
+[2m[36m(pid=51044)[0m Run with --stacktrace option to get the stack trace. Run with --info or --debug option to get more log output.
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m BUILD FAILED
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m Total time: 16.515 secs
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m Minecraft process finished unexpectedly. There was an error with Malmo.
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m During handling of the above exception, another exception occurred:
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m Traceback (most recent call last):
+[2m[36m(pid=51044)[0m   File "python\ray\_raylet.pyx", line 551, in ray._raylet.task_execution_handler
+[2m[36m(pid=51044)[0m   File "python\ray\_raylet.pyx", line 438, in ray._raylet.execute_task
+[2m[36m(pid=51044)[0m   File "python\ray\_raylet.pyx", line 517, in ray._raylet.execute_task
+[2m[36m(pid=51044)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\utils.py", line 96, in push_error_to_driver
+[2m[36m(pid=51044)[0m     worker.core_worker.push_error(job_id, error_type, message, time.time())
+[2m[36m(pid=51044)[0m   File "python\ray\_raylet.pyx", line 1465, in ray._raylet.CoreWorker.push_error
+[2m[36m(pid=51044)[0m UnicodeEncodeError: 'ascii' codec can't encode characters in position 1145-1146: ordinal not in range(128)
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m During handling of the above exception, another exception occurred:
+[2m[36m(pid=51044)[0m 
+[2m[36m(pid=51044)[0m Traceback (most recent call last):
+[2m[36m(pid=51044)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\utils.py", line 96, in push_error_to_driver
+[2m[36m(pid=51044)[0m     worker.core_worker.push_error(job_id, error_type, message, time.time())
+[2m[36m(pid=51044)[0m   File "python\ray\_raylet.pyx", line 1465, in ray._raylet.CoreWorker.push_error
+[2m[36m(pid=51044)[0m UnicodeEncodeError: 'ascii' codec can't encode characters in position 1267-1268: ordinal not in range(128)
+[2m[36m(pid=51044)[0m Exception ignored in: 'ray._raylet.task_execution_handler'
+[2m[36m(pid=51044)[0m Traceback (most recent call last):
+[2m[36m(pid=51044)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\utils.py", line 96, in push_error_to_driver
+[2m[36m(pid=51044)[0m     worker.core_worker.push_error(job_id, error_type, message, time.time())
+[2m[36m(pid=51044)[0m   File "python\ray\_raylet.pyx", line 1465, in ray._raylet.CoreWorker.push_error
+[2m[36m(pid=51044)[0m UnicodeEncodeError: 'ascii' codec can't encode characters in position 1267-1268: ordinal not in range(128)
+[2m[36m(pid=59384)[0m Traceback (most recent call last):
+[2m[36m(pid=59384)[0m   File "python\ray\_raylet.pyx", line 477, in ray._raylet.execute_task
+[2m[36m(pid=59384)[0m   File "python\ray\_raylet.pyx", line 481, in ray._raylet.execute_task
+[2m[36m(pid=59384)[0m   File "python\ray\_raylet.pyx", line 482, in ray._raylet.execute_task
+[2m[36m(pid=59384)[0m   File "<ipython-input-21-161ecb96966f>", line 5, in make_env
+[2m[36m(pid=59384)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\envs\registration.py", line 145, in make
+[2m[36m(pid=59384)[0m     return registry.make(id, **kwargs)
+[2m[36m(pid=59384)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\envs\registration.py", line 90, in make
+[2m[36m(pid=59384)[0m     env = spec.make(**kwargs)
+[2m[36m(pid=59384)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\envs\registration.py", line 60, in make
+[2m[36m(pid=59384)[0m     env = cls(**_kwargs)
+[2m[36m(pid=59384)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\minerl\env\core.py", line 137, in __init__
+[2m[36m(pid=59384)[0m     self.instance = self._get_new_instance(port)
+[2m[36m(pid=59384)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\minerl\env\core.py", line 159, in _get_new_instance
+[2m[36m(pid=59384)[0m     instance.launch()
+[2m[36m(pid=59384)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\minerl\env\malmo.py", line 512, in launch
+[2m[36m(pid=59384)[0m     raise EOFError(error_str + "\n\nMinecraft process finished unexpectedly. There was an error with Malmo.")
+[2m[36m(pid=59384)[0m EOFError: 다른 프로세스가 파일을 사용 중이기 때문에 프로세스가 액세스 할 수 없습니다.
+[2m[36m(pid=59384)[0m This mapping 'snapshot_20161220' was designed for MC 1.11! Use at your own peril.
+[2m[36m(pid=59384)[0m WARNING: You are using an unsupported version of ForgeGradle.
+[2m[36m(pid=59384)[0m Please consider upgrading to ForgeGradle 4 and helping in the efforts to get old versions working on the modern toolchain.
+[2m[36m(pid=59384)[0m See https://gist.github.com/TheCurle/fe7ad3ede188cbdd15c235cc75d52d4a for more info on contributing.
+[2m[36m(pid=59384)[0m #################################################
+[2m[36m(pid=59384)[0m          ForgeGradle 2.2.1-g5be7818        
+[2m[36m(pid=59384)[0m   https://github.com/MinecraftForge/ForgeGradle  
+[2m[36m(pid=59384)[0m #################################################
+[2m[36m(pid=59384)[0m                Powered by MCP unknown               
+[2m[36m(pid=59384)[0m              http://modcoderpack.com             
+[2m[36m(pid=59384)[0m          by: Searge, ProfMobius, Fesh0r,         
+[2m[36m(pid=59384)[0m          R4wk, ZeuX, IngisKahn, bspkrs           
+[2m[36m(pid=59384)[0m #################################################
+[2m[36m(pid=59384)[0m Found AccessTransformer: malmomod_at.cfg
+[2m[36m(pid=59384)[0m :deobfCompileDummyTask
+[2m[36m(pid=59384)[0m :deobfProvidedDummyTask
+[2m[36m(pid=59384)[0m :getVersionJson
+[2m[36m(pid=59384)[0m :extractUserdev UP-TO-DATE
+[2m[36m(pid=59384)[0m :downloadClient SKIPPED
+[2m[36m(pid=59384)[0m :downloadServer SKIPPED
+[2m[36m(pid=59384)[0m :splitServerJar SKIPPED
+[2m[36m(pid=59384)[0m :mergeJars SKIPPED
+[2m[36m(pid=59384)[0m :applyBinaryPatches SKIPPED
+[2m[36m(pid=59384)[0m :extractDependencyATs SKIPPED
+[2m[36m(pid=59384)[0m :extractMcpData SKIPPED
+[2m[36m(pid=59384)[0m :extractMcpMappings SKIPPED
+[2m[36m(pid=59384)[0m :genSrgs SKIPPED
+[2m[36m(pid=59384)[0m :deobfMcMCP
+[2m[36m(pid=59384)[0m Applying SpecialSource...
+[2m[36m(pid=59384)[0m Applying Exceptor...
+[2m[36m(pid=59384)[0m :deobfMcMCP FAILED
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m FAILURE: Build failed with an exception.
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m * What went wrong:
+[2m[36m(pid=59384)[0m Execution failed for task ':deobfMcMCP'.
+[2m[36m(pid=59384)[0m > com.google.gson.JsonNull cannot be cast to com.google.gson.JsonObject
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m * Try:
+[2m[36m(pid=59384)[0m Run with --stacktrace option to get the stack trace. Run with --info or --debug option to get more log output.
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m BUILD FAILED
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m Total time: 29.123 secs
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m Minecraft process finished unexpectedly. There was an error with Malmo.
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m During handling of the above exception, another exception occurred:
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m Traceback (most recent call last):
+[2m[36m(pid=59384)[0m   File "python\ray\_raylet.pyx", line 551, in ray._raylet.task_execution_handler
+[2m[36m(pid=59384)[0m   File "python\ray\_raylet.pyx", line 438, in ray._raylet.execute_task
+[2m[36m(pid=59384)[0m   File "python\ray\_raylet.pyx", line 517, in ray._raylet.execute_task
+[2m[36m(pid=59384)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\utils.py", line 96, in push_error_to_driver
+[2m[36m(pid=59384)[0m     worker.core_worker.push_error(job_id, error_type, message, time.time())
+[2m[36m(pid=59384)[0m   File "python\ray\_raylet.pyx", line 1465, in ray._raylet.CoreWorker.push_error
+[2m[36m(pid=59384)[0m UnicodeEncodeError: 'ascii' codec can't encode characters in position 1145-1146: ordinal not in range(128)
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m During handling of the above exception, another exception occurred:
+[2m[36m(pid=59384)[0m 
+[2m[36m(pid=59384)[0m Traceback (most recent call last):
+[2m[36m(pid=59384)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\utils.py", line 96, in push_error_to_driver
+[2m[36m(pid=59384)[0m     worker.core_worker.push_error(job_id, error_type, message, time.time())
+[2m[36m(pid=59384)[0m   File "python\ray\_raylet.pyx", line 1465, in ray._raylet.CoreWorker.push_error
+[2m[36m(pid=59384)[0m UnicodeEncodeError: 'ascii' codec can't encode characters in position 1267-1268: ordinal not in range(128)
+[2m[36m(pid=59384)[0m Exception ignored in: 'ray._raylet.task_execution_handler'
+[2m[36m(pid=59384)[0m Traceback (most recent call last):
+[2m[36m(pid=59384)[0m   File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\utils.py", line 96, in push_error_to_driver
+[2m[36m(pid=59384)[0m     worker.core_worker.push_error(job_id, error_type, message, time.time())
+[2m[36m(pid=59384)[0m   File "python\ray\_raylet.pyx", line 1465, in ray._raylet.CoreWorker.push_error
+[2m[36m(pid=59384)[0m UnicodeEncodeError: 'ascii' codec can't encode characters in position 1267-1268: ordinal not in range(128)
+2021-05-12 17:43:32,670	ERROR worker.py:1037 -- Possible unhandled error from worker: [36mray::make_env()[39m (pid=47728, ip=192.168.0.22)
+  File "python\ray\_raylet.pyx", line 496, in ray._raylet.execute_task
+  File "python\ray\_raylet.pyx", line 497, in ray._raylet.execute_task
+  File "python\ray\_raylet.pyx", line 1358, in ray._raylet.CoreWorker.store_task_outputs
+  File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\serialization.py", line 404, in serialize
+    return self._serialize_to_msgpack(value)
+  File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\serialization.py", line 384, in _serialize_to_msgpack
+    self._serialize_to_pickle5(metadata, python_objects)
+  File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\serialization.py", line 344, in _serialize_to_pickle5
+    raise e
+  File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\serialization.py", line 341, in _serialize_to_pickle5
+    value, protocol=5, buffer_callback=writer.buffer_callback)
+  File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\cloudpickle\cloudpickle_fast.py", line 70, in dumps
+    cp.dump(obj)
+  File "c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\ray\cloudpickle\cloudpickle_fast.py", line 656, in dump
+    return Pickler.dump(self, obj)
+TypeError: can't pickle _thread.lock objects
+[2m[36m(pid=47728)[0m c:\users\kukjinkim\anaconda3\envs\minerl\lib\site-packages\gym\logger.py:30: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+[2m[36m(pid=47728)[0m   warnings.warn(colorize('%s: %s'%('WARN', msg % args), 'yellow'))
