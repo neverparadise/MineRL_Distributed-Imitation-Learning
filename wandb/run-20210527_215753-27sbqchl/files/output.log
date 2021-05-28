@@ -1,0 +1,1 @@
+[36m(pid=188147)[39m   warnings.warn(colorize('%s: %s'%('WARN', msg % args), 'yellow'))
