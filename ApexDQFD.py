@@ -13,7 +13,6 @@ from utils import *
 import random
 
 from subprocess import call
-call(["wandb", "login", "e694c5143ff8b3ba1e2b275f0ddff63443464b98"])
 
 #하이퍼 파라미터
 learning_rate = 0.0003
