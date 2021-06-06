@@ -12,8 +12,8 @@ import ray
 import os
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-learning_rate = 0.0003
-gamma = 0.999
+learning_rate = 0.001
+gamma = 0.99
 buffer_limit = 50000
 L1 = 0.9
 model_path = os.curdir + '/dqn_model/'
@@ -65,6 +65,7 @@ class Memory:  # stored as ( s, a, r, s_, n_rewards ) in SumTree
     beta_increment_per_sampling = 0.001
 
     def __init__(self, capacity):
+        print("Memory is initialized")
         self.tree = SumTree(capacity)
         self.capacity = capacity
 
@@ -96,9 +97,9 @@ class Memory:  # stored as ( s, a, r, s_, n_rewards ) in SumTree
             batch.append(data)
             idxs.append(idx)
 
-        sampling_probabilities = priorities / self.tree.total()
+        sampling_probabilities = priorities / (self.tree.total()+ 1e-5)
         is_weight = np.power(self.tree.n_entries * sampling_probabilities, -self.beta)
-        is_weight /= is_weight.max() + 1e-5
+        is_weight /= (is_weight.max() + 1e-5)
 
         return batch, idxs, is_weight
 
@@ -106,7 +107,7 @@ class Memory:  # stored as ( s, a, r, s_, n_rewards ) in SumTree
         p = self._get_priority(error)
         self.tree.update(idx, p)
 
-def train_dqn(policy_net, target_net, demos, batch_size, demo_prob, optimizer):
+def train_dqn(policy_net, target_net, demos, batch_size, optimizer):
     demo_batch, idxs, is_weights = ray.get(demos.sample.remote(batch_size))
     state_list = []
     action_list = []
@@ -420,7 +421,7 @@ def margin_loss(q_value, action, demo, weigths):
     return J_e
 
 def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, threshold=10, num_epochs=1, batch_size=16,
-              seq_len=10, gamma=0.99, model_name='pretrained'):
+              seq_len=10, gamma=0.99, model_name='pretrained', nstep=10):
     data = minerl.data.make(env_name)
     print("data loading sucess")
     demo_num = 0
@@ -451,7 +452,7 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, threshold
         for i in range(0, batch_length):
             episode_start_ts = 0
 
-            n_step = seq_len
+            n_step = nstep
             n_step_state_buffer = deque(maxlen=n_step)
             n_step_action_buffer = deque(maxlen=n_step)
             n_step_reward_buffer = deque(maxlen=n_step)
@@ -537,7 +538,7 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, threshold
                 # 카메라, 움직임이 다 0이고 공격만 하는 것
                 else:
                     if (av == 0):
-                        continue
+                        pass
                     else:
                         action_index = 18
 
@@ -570,7 +571,7 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, threshold
         # if rep_buffer.size() > rep_buffer.buffer_limit:
         #    rep_buffer.buffer.popleft()
         print('Parse finished. {} expert samples added.'.format(parse_ts))
-        train_dqn(policy_net, target_net, rep_buffer, batch_size, 1, optimizer)
+        train_dqn(policy_net, target_net, rep_buffer, 256, optimizer)
         torch.save(policy_net.state_dict(), model_path + model_name)
         if demo_num % 5 == 0 and demo_num != 0:
             # 특정 반복 수가 되면 타겟 네트워크도 업데이트
@@ -581,13 +582,13 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, threshold
     return rep_buffer
 
 @ray.remote
-def parse_demo2(env_name, rep_buffer, policy_net, target_net, optimizer, threshold=10, num_epochs=1, batch_size=16,
-              seq_len=10, gamma=0.99, model_name='pretrained'):
+def parse_demo2(env_name, rep_buffer, policy_net, target_net, threshold=10, num_epochs=1, batch_size=16,
+              seq_len=10, gamma=0.99):
     data = minerl.data.make(env_name)
     print("data loading sucess")
     demo_num = 0
     for s_batch, a_batch, r_batch, ns_batch, d_batch in data.batch_iter(num_epochs=num_epochs, batch_size=batch_size,seq_len=seq_len):
-        if(demo_num == 5):
+        if(ray.get(rep_buffer.size.remote()) > 10000):
             break
 
         demo_num += 1
@@ -616,7 +617,7 @@ def parse_demo2(env_name, rep_buffer, policy_net, target_net, optimizer, thresho
         for i in range(0, batch_length):
             episode_start_ts = 0
 
-            n_step = seq_len
+            n_step = 10
             n_step_state_buffer = deque(maxlen=n_step)
             n_step_action_buffer = deque(maxlen=n_step)
             n_step_reward_buffer = deque(maxlen=n_step)
