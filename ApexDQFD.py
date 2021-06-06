@@ -116,7 +116,7 @@ class Actor:
             if (self.epsilon > endEpsilon):
                 self.epsilon -= stepDrop / (self.actor_idx + 1)
 
-            n_step = 10
+            n_step = 2
             n_step_state_buffer = deque(maxlen=n_step)
             n_step_action_buffer = deque(maxlen=n_step)
             n_step_reward_buffer = deque(maxlen=n_step)
@@ -131,7 +131,7 @@ class Actor:
                 a_out = self.actor_network.sample_action(state, self.epsilon)
                 action_index = a_out
                 action = make_action(self.env, action_index)
-                action['attack'] = 1
+                #action['attack'] = 1
                 obs_prime, reward, done, info = self.env.step(action)
                 total_reward += reward
                 state_prime = converter(obs_prime)
@@ -269,11 +269,6 @@ class Learner:
             supervised_loss = margin_loss(q_vals, a, 1, 1)
 
             loss = q_loss + supervised_loss + n_step_loss
-            wandb.log({"Q-loss": q_loss.item()})
-            wandb.log({"n-step loss": n_step_loss.item()})
-            wandb.log({"super_vised loss": supervised_loss.item()})
-            wandb.log({"total loss": loss.item()})
-
             errors = torch.abs(state_action_values - target).data.cpu().detach()
             errors = errors.numpy()
             # update priority
@@ -304,19 +299,19 @@ ray.init()
 policy_net = DQN(19).cuda()
 target_net = DQN(19).cuda()
 target_net.load_state_dict(policy_net.state_dict())
-memory = Memory.remote(25000)
+memory = Memory.remote(50000)
 demos = Memory.remote(25000)
 optimizer = optim.Adam(policy_net.parameters(), lr=learning_rate, weight_decay=1e-5)
 
 # Copy network params from pretrained Agent
-model_path = './dqn_model/pre_trained4.pth'
+model_path = './dqn_model/pre_trained6.pth'
 policy_net.load_state_dict(torch.load(model_path, map_location='cuda:0'))
 target_net.load_state_dict(policy_net.state_dict())
 
-#parse_demo2.remote("MineRLTreechop-v0", demos, policy_net.cpu(), target_net.cpu(), optimizer, threshold=60, num_epochs=1, batch_size=128, seq_len=30, gamma=0.99, model_name='pre_trained4.pth')
+#parse_demo2.remote("MineRLTreechop-v0", demos, policy_net.cpu(), target_net.cpu(), optimizer, threshold=60, num_epochs=1, batch_size=4, seq_len=60, gamma=0.99, model_name='pre_trained4.pth')
 
 # learner network initialzation
-batch_size = 128
+batch_size = 256
 demo_prob = 0.5
 learner = Learner.remote(policy_net, batch_size)
 
@@ -332,7 +327,6 @@ actor_list = [Actor.remote(learner, i, 0.5) for i in range(num_actors)]
 explore = [actor.explore.remote(learner, memory) for actor in actor_list]
 
 #explore = [actor.explore.remote(learner, ray.get(memory_id)) for actor in actor_list]
+update = learner.update_network.remote(memory, demos, batch_size, optimizer, actor_list[0])
 ray.get(explore)
-learner.update_network.remote(memory, demos, batch_size, optimizer, actor_list[0])
-ray.get(explore)
-
+ray.get(update)

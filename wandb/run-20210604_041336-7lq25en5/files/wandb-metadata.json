@@ -1,0 +1,24 @@
+{
+    "os": "Linux-5.8.0-53-generic-x86_64-with-debian-bullseye-sid",
+    "python": "3.7.9",
+    "heartbeatAt": "2021-06-03T19:13:37.541853",
+    "startedAt": "2021-06-03T19:13:36.713547",
+    "docker": null,
+    "gpu": "GeForce RTX 2070 SUPER",
+    "gpu_count": 1,
+    "cpu_count": 12,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/home/kukjin/Study/RL/softwardcapstonedesign/ApexDQFD/pre_train.py",
+    "codePath": "pre_train.py",
+    "git": {
+        "remote": "https://github.com/neverparadise/MineRL_Distributed-Imitation-Learning.git",
+        "commit": "7707b5e2c7ce422f1aac5536dac24ab5e8c621da"
+    },
+    "email": "ye20013@gmail.com",
+    "root": "/home/kukjin/Study/RL/softwardcapstonedesign/ApexDQFD",
+    "host": "kukjin-System-Product-Name",
+    "username": "kukjin",
+    "executable": "/home/kukjin/anaconda3/envs/minerl/bin/python"
+}
