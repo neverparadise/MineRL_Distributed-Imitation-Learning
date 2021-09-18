@@ -1,2 +1,4 @@
 temp/
 logs/
+wandb/
+.ipynb_checkpoints/
