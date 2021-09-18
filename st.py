@@ -7,7 +7,6 @@ class SumTree:
     write = 0
 
     def __init__(self, capacity):
-
         """
         self.capacity : 원소의 총 개수
         self.tree : capacity * 2 - 1로 트리를 만듬. 왜? 인덱스가 2의배수로 늘어나기 때문

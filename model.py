@@ -5,7 +5,6 @@ import torch.optim as optim
 import random
 import gym
 from torch.distributions import Categorical
-import ray
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -53,7 +52,7 @@ class DQN(nn.Module):
 class DRQN(nn.Module):
     def __init__(self, num_actions):
         self.num_actions = num_actions
-        super(DQN, self).__init__()
+        super(DRQN, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, kernel_size=8, stride=4)
         self.bn1 = nn.BatchNorm2d(32)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
