@@ -144,3 +144,29 @@ class RemoteMemory:  # stored as ( s, a, r, s_, n_rewards ) in SumTree
     def update(self, idx, error):
         p = self._get_priority(error)
         self.tree.update(idx, p)
+
+def append_sample(memory, model, target_model, state, action, reward, next_state, done, n_rewards=None):
+    # Caluclating Priority (TD Error)
+    target = model(state).data
+    old_val = target[0][action].cpu()
+    target_val = target_model(next_state.float()).data.cpu()
+    if done:
+        target[0][action] = reward
+    else:
+        target[0][action] = reward + 0.99 * torch.max(target_val)
+
+    error = abs(old_val - target[0][action])
+    error = error.cpu()
+    if isinstance(memory, Memory):
+        if n_rewards == None:
+            memory.add(error, [state, action, reward, next_state, done])
+        else:
+            memory.add(error, (state, action, reward, next_state, done, n_rewards))
+
+    else:
+        if n_rewards == None:
+            memory.remote.add(error, [state, action, reward, next_state, done])
+        else:
+            memory.add.remote(error, (state, action, reward, next_state, done, n_rewards))
+
+# 여기 있으면 안된다. actor에 있거나 util에 있어야 할듯.

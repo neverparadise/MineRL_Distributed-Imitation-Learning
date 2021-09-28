@@ -43,7 +43,7 @@ endEpsilon = 0.05
 epsilon = startEpsilon
 
 root_path = os.curdir
-model_path = root_path + '/dqn_model/'
+model_path = root_path + '/trained_model/'
 
 stepDrop = (startEpsilon - endEpsilon) / total_episodes
 
@@ -96,8 +96,6 @@ class Actor:
     # 각 환경 인스턴스에서 각 엡실론에 따라 탐험을 진행한다.
     # 탐험 과정에서 local buffer에 transition들을 저장한다.
     # local buffer의 개수가 특정 개수 이상이면 global buffer에 추가해준다.
-    def make_inveractive(self):
-        self.env.make_interactive(port=self.port_number, realtime=False)
 
     def explore(self, learner, shared_memory):
         self.env.make_interactive(port=self.port_number, realtime=False)

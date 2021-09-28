@@ -1,4 +1,5 @@
 temp/
 logs/
 wandb/
-.ipynb_checkpoints/
+/.ipynb_checkpoints/
+/lib_test/

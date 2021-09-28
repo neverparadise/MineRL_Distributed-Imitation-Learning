@@ -1,36 +1,46 @@
-from model import DQN
+from model import *
 from utils import *
-from replay_buffer import Memory, RemoteMemory
+from replay_buffer import *
 import argparse
 import os
+import yaml
 
 #하이퍼 파라미터
-learning_rate = 0.0003
-gamma = 0.999
-buffer_limit = 50000
-L1 = 0.9
+with open('navigate.yaml') as f:
+    args = yaml.load(f, Loader=yaml.FullLoader)
+
+parser = argparse.ArgumentParser(description='argparse for pretraining')
+parser.add_argument('--model_name', type=str, default="pre_trained", help='pre_trained model name')
+parse = parser.parse_args()
+
+model_name = parse.model_name
+config = {'model_name': parse.model_name}
+
+env_name = args['env_name']
+gamma = args['gamma']
+learning_rate = args['lr']
+# max_epi = args['max_epi']
+# agent_num = args['agent_num']
+num_gpus = args['num_gpus']
+num_channels = args['num_channels']
+buffer_limit = args['buffer_limit']
+L1 = args['L1']
+pretrain_epochs = args['pretrain_epochs']
+threshold = args['threshold']
+batch_size = args['batch_size']
+seq_len = args['seq_len']
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model_path = os.curdir + '/dqn_model/'
+model_path = os.curdir + '/trained_model/'
 
-def append_sample(memory, model, target_model, state, action, reward, next_state, done):
-    # Caluclating Priority (TD Error)
-    target = model(state.float()).data
-    old_val = target[0][action].cpu()
-    target_val = target_model(next_state.float()).data.cpu()
-    if done:
-        target[0][action] = reward
-    else:
-        target[0][action] = reward + 0.99 * torch.max(target_val)
+def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, model_name='pre_trained_drqn'):
+    gamma = args['gamma']
+    num_epochs = args['pretrain_epochs']
+    threshold = args['threshold']
+    batch_size = args['batch_size']
+    seq_len = args['seq_len']
 
-    error = abs(old_val - target[0][action])
-    error = error.cpu()
-    if isinstance(memory, Memory):
-        memory.add(error, [state, action, reward, next_state, done])
-    else:
-        memory.remote.add(error, [state, action, reward, next_state, done])
-
-def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, threshold=10, num_epochs=1, batch_size=16,
-              seq_len=10, gamma=0.99, model_name='pre_trained'):
+    # Data loading
     data = minerl.data.make(env_name)
     print("data loading sucess")
     demo_num = 0
@@ -61,7 +71,7 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, threshold
         for i in range(0, batch_length):
             episode_start_ts = 0
 
-            n_step = nstep
+            n_step = seq_len
             n_step_state_buffer = deque(maxlen=n_step)
             n_step_action_buffer = deque(maxlen=n_step)
             n_step_reward_buffer = deque(maxlen=n_step)
@@ -191,29 +201,16 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, threshold
     print('pre_train finished')
     return rep_buffer
 
+def save(model, out_dir=None):
+    torch.save(model.state_dict, out_dir)
 
-parser = argparse.ArgumentParser(description='argparse for pretraining')
-parser.add_argument('--env', type=str, default="MineRLTreechop-v0", help='name of MineRLEnvironment')
-parser.add_argument('--threshold', type=int, default=640, help='reward threshold for parsing demos')
-parser.add_argument('--epochs', type=int, default=10, help='the number of training epochs')
-parser.add_argument('--seq_len', type=int, default=400, help='sequence length for parsing demos')
-parser.add_argument('--batch_size', type=int, default=32, help='batch_size for training')
-parser.add_argument('--gamma', type=float, default=0.99, help='gamma for calculating return')
-parser.add_argument('--model_name', type=str, default="pre_trained", help='pre_trained model name')
-args = parser.parse_args()
-
-config = {'env  ': args.env,
-          'threshold': args.threshold,
-          'epochs': args.epochs,
-          'batch_size': args.batch_size,
-          'seq_len': args.seq_len,
-          'gamma': args.gamma,
-          'model_name': args.model_name}
-
+def load(model, dir=None):
+    model.load_state_dict(torch.load(dir))
+    model.eval()
 
 def main():
-    policy_net = DQN(19).to(device=device)
-    target_net = DQN(19).to(device=device)
+    policy_net = DRQN(num_channels=num_channels, num_actions=19).to(device=device)
+    target_net = DRQN(num_channels=num_channels, num_actions=19).to(device=device)
     target_net.load_state_dict(policy_net.state_dict())
     memory = Memory(50000)
     optimizer = optim.Adam(policy_net.parameters(), lr=learning_rate, weight_decay=1e-5)

@@ -1,6 +1,4 @@
 import numpy
-
-
 # SumTree
 # a binary tree data structure where the parent’s value is the sum of its children
 class SumTree:
@@ -72,7 +70,6 @@ class SumTree:
 
         self.tree[idx] = p
         self._propagate(idx, change)
-
     # get priority and sample
     def get(self, s):
         idx = self._retrieve(0, s)

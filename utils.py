@@ -1,5 +1,6 @@
 import torch
 import random
+from replay_buffer import append_sample
 from _collections import deque
 import gym
 import minerl
@@ -7,18 +8,17 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-import wandb
 import ray
 import os
+import yaml
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-learning_rate = 0.001
-gamma = 0.99
-buffer_limit = 50000
-L1 = 0.9
-model_path = os.curdir + '/dqn_model/'
 
-def make_action(env, action_index):
+with open('navigate.yaml') as f:
+    args = yaml.load(f, Loader=yaml.FullLoader)
+env_name = args['env_name']
+
+def make_19action(env, action_index):
     # Action들을 정의
     action = env.action_space.noop()
     if (action_index == 0):
@@ -81,8 +81,7 @@ def make_action(env, action_index):
 
     return action
 
-
-def make_action2(env, action_index):
+def make_9action(env, action_index):
     # Action들을 정의
     action = env.action_space.noop()
     if (action_index == 0):
@@ -115,19 +114,29 @@ def make_action2(env, action_index):
 
     return action
 
+def parse_action(camera_angle):
+    pass
 
-def converter(observation):
+
+def converter(env_name, observation):
+    if (env_name == 'MineRLNavigateDense-v0' or
+            env_name == 'MineRLNavigate-v0'):
+        obs = observation['pov']
+        obs = obs / 255.0  # [64, 64, 3]
+        compass_angle = observation['compassAngle']
+        compass_angle_scale = 180
+        compass_scaled = compass_angle / compass_angle_scale
+        compass_channel = np.ones(shape=list(obs.shape[:-1]) + [1], dtype=obs.dtype) * compass_scaled
+        obs = np.concatenate([obs, compass_channel], axis=-1)
+        obs = torch.from_numpy(obs)
+        obs = obs.permute(2, 0, 1)
+        return obs.float()
+    else:
         obs = observation['pov']
         obs = obs / 255.0
         obs = torch.from_numpy(obs)
         obs = obs.permute(2, 0, 1)
-        return obs
-
-def converter2(observation):
-    obs = observation / 255.0
-    obs = torch.from_numpy(obs)
-    obs = obs.permute(2, 0, 1)
-    return obs
+        return obs.float()
 
 def parse_demo(env_name, rep_buffer, threshold=10, nsteps=10, num_epochs=1, batch_size=16, seq_len=10, gamma=0.99):
     data = minerl.data.make(env_name)
@@ -279,21 +288,6 @@ def parse_demo(env_name, rep_buffer, threshold=10, nsteps=10, num_epochs=1, batc
     print('add_demo finished')
     return rep_buffer
 
-def append_sample(memory, model, target_model, state, action, reward, next_state, done, n_rewards):
-    target = model(state).data.cpu()
-    old_val = target[0][action]
-    target_val = target_model(next_state).cpu()
-    if done:
-        target[0][action] = reward
-    else:
-        target[0][action] = reward + 0.99 * torch.max(target_val)
-
-    error = abs(old_val - target[0][action])
-    error = error.detach()
-    memory.add.remote(error, (state, action, reward, next_state, done, n_rewards))
-
-
-
 @ray.remote
 def parse_demo2(env_name, rep_buffer, policy_net, target_net, threshold=10, num_epochs=1, batch_size=16,
               seq_len=10, gamma=0.99):
@@ -351,6 +345,7 @@ def parse_demo2(env_name, rep_buffer, policy_net, target_net, threshold=10, num_
 
                 camera_thresholds = (abs(va) + abs(ha)) / 2.0
                 # 카메라를 움직이는 경우
+                action_index = None
                 if (camera_thresholds > 2.5):
                     # camera = [0, -5]
                     if abs(va) < abs(ha) and ha < 0:
@@ -377,7 +372,7 @@ def parse_demo2(env_name, rep_buffer, policy_net, target_net, threshold=10, num_
                         else:
                             action_index = 7
 
-                            # 카메라를 안움직이는 경우
+                # 카메라를 안움직이는 경우
                 # 점프하는 경우
                 elif (aj == 1):
                     if (af == 0):
@@ -421,15 +416,15 @@ def parse_demo2(env_name, rep_buffer, policy_net, target_net, threshold=10, num_
                         action_index = 18
 
                 a_index = torch.LongTensor([action_index]).cpu()
-                curr_obs = converter2(s_batch['pov'][i][j]).float().cpu()
-                _obs = converter2(ns_batch['pov'][i][j]).float().cpu()
+                current_obs = converter(env_name, s_batch['pov'][i][j]).float().cpu()
+                next_obs = converter(env_name, ns_batch['pov'][i][j]).float().cpu()
                 _reward = torch.FloatTensor([r_batch[i][j]]).cpu()
                 _done = d_batch[i][j]  # .astype(int)
 
-                n_step_state_buffer.append(curr_obs)
+                n_step_state_buffer.append(current_obs)
                 n_step_action_buffer.append(a_index)
                 n_step_reward_buffer.append(_reward)
-                n_step_next_state_buffer.append(_obs)
+                n_step_next_state_buffer.append(next_obs)
                 n_step_done_buffer.append(_done)
                 n_rewards = sum([gamma * reward for gamma, reward in zip(gamma_list, n_step_reward_buffer)])
                 n_step_n_rewards_buffer.append(n_rewards)
@@ -457,9 +452,3 @@ def parse_demo2(env_name, rep_buffer, policy_net, target_net, threshold=10, num_
         print('Parse finished. {} expert samples added.'.format(parse_ts))
 
 
-def save(model, out_dir=None):
-    torch.save(model.state_dict, out_dir)
-
-def load(model, dir=None):
-    model.load_state_dict(torch.load(dir))
-    model.eval()
