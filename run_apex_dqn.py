@@ -27,9 +27,23 @@ root_path = os.curdir
 model_path = root_path + '/trained_model/'
 
 writer = SummaryWriter('runs/a3c/')
+
+
+@ray.remote
+class ParameterServer:
+    def __init__(self, num_channels, num_actions):
+        self.policy_params = DQN(num_channels, num_actions).state_dict()
+        self.target_params = DQN(num_channels, num_actions).state_dict()
+
+    def pull_from_learner(self, learner):
+        learner.push_parameters.remote(self.policy_params, self.target_params)
+
+    def push_to_actor(self):
+        return self.policy_params, self.target_params
+
 @ray.remote(num_gpus=0.2)
 class Actor:
-    def __init__(self, learner, actor_idx, epsilon, num_channels=3, num_actions=19):
+    def __init__(self, learner, param_server, actor_idx, epsilon, num_channels=3, num_actions=19, ):
         # environment initialization
         import gym
         import minerl
@@ -39,7 +53,7 @@ class Actor:
         print("actor environment %d initialize successfully" % self.actor_idx)
         self.env.make_interactive(port=self.port_number, realtime=False)
         self.learner_state_dict = ray.get(learner.get_state_dict.remote())
-
+        print("getting learner state dict finished...")
         # network initalization
         self.actor_network = DQN(num_channels, num_actions).cuda()
         self.actor_target_network = DQN(num_channels, num_actions).cuda()
@@ -47,6 +61,7 @@ class Actor:
         self.actor_target_network.load_state_dict(self.learner_state_dict)
         print("actor network %d initialize successfully" % self.actor_idx)
 
+        self.param_server = param_server
         self.epi_counter = 0
         self.max_epi = 1000
         self.n_step = 4
@@ -74,8 +89,10 @@ class Actor:
         return self.epi_counter
 
     def update_params(self, learner):
-        learner_state_dict = ray.get(learner.get_state_dict.remote())
-        self.actor_network.load_state_dict(learner_state_dict)
+        ray.get(self.param_server.pull_from_learner.remote(learner))
+        policy_params, target_params = ray.get(self.param_server.push_to_actor.remote())
+        self.actor_network.load_state_dict(policy_params)
+        self.actor_target_network.load_state_dict(target_params)
 
     def append_sample(self, memory, state, action, reward, next_state, done, n_rewards=None):
         # Caluclating Priority (TD Error)
@@ -173,7 +190,7 @@ class Actor:
 
 @ray.remote(num_gpus=0.4)
 class Learner:
-    def __init__(self, batch_size, num_channels, num_actions):
+    def __init__(self, param_server, batch_size, num_channels, num_actions):
         self.learner_network = DQN(num_channels, num_actions).cuda().float()
         self.learner_target_network = DQN(num_channels, num_actions).cuda().float()
         self.count = 0
@@ -182,20 +199,25 @@ class Learner:
 
         self.lr = LR
         self.optimizer = optim.Adam(self.learner_network.parameters(), self.lr)
+        self.param_server = param_server
 
-    def count(self):
+    def learning_count(self):
         return self.count
 
     def get_state_dict(self):
         return self.learner_network.state_dict()
+
+    def push_parameters(self, temp_network_dict, temp_target_dict):
+        temp_network_dict = (self.learner_network.state_dict())
+        temp_target_dict = (self.learner_target_network.state_dict())
 
     def load(self, dir):
         network = torch.load(dir)
         self.learner_network.load_state_dict(network.state_dict())
         self.learner_target_network.load_state_dict(network.state_dict())
 
-    def update_network(self, memory, actor_list):
-        # while (actor.episode < 100)
+    def update_network(self, memory):
+
         if isinstance(memory, Memory):
             agent_batch, agent_idxs, agent_weights = memory.sample(self.batch_size)
         else:
@@ -269,23 +291,29 @@ def main():
     target_net.load_state_dict(policy_net.state_dict())
     #memory = Memory(50000)
     #shared_memory = ray.get(ray.put(memory))
-    memory = RemoteMemory.remote(50000)
-
+    memory = RemoteMemory.remote(30000)
     num_channels = 4
     num_actions = 19
     batch_size = 256
-    learner = Learner.remote(batch_size,  num_channels, num_actions)
+    param_server = ParameterServer.remote(num_channels, num_actions)
+    learner = (Learner.remote(param_server, batch_size, num_channels, num_actions))
+    print(learner)
+    print(learner.get_state_dict.remote())
 
     num_actors = 2
     epsilon = 0.9
 
-    actor_list = [Actor.remote(learner, i, epsilon, num_channels, num_actions) for i in range(num_actors)]
-
+    actor_list = [Actor.remote(learner, param_server, i, epsilon, num_channels, num_actions) for i in range(num_actors)]
     explore = [actor.explore.remote(learner, memory) for actor in actor_list]
-    total_epi = sum([ray.get(actor.get_epi_counter()) for actor in actor_list])
+    learn = learner.update_network.remote(memory)
     ray.get(explore)
-    while total_epi < 1000:
-        loss = learner.update_network.remote(memory, actor_list)
-        ray.get(loss)
+    # while (actor.episode < 100)
+    # print(f"learning count : {self.count}")
+    while ray.get(learner.learning_count.remote()) < 10000000:
+        if ray.get(learner.learning_count.remote()) % 100 == 0:
+            print(ray.get(learner.learning_count.remote()))
+        memory_size = ray.get(memory.size.remote())
+        if memory_size > 2000:
+            ray.get(learn)
 
 main()
