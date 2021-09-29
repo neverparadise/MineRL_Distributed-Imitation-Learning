@@ -305,7 +305,6 @@ def main():
 
     actor_list = [Actor.remote(learner, param_server, i, epsilon, num_channels, num_actions) for i in range(num_actors)]
     explore = [actor.explore.remote(learner, memory) for actor in actor_list]
-    learn = learner.update_network.remote(memory)
     ray.get(explore)
     # while (actor.episode < 100)
     # print(f"learning count : {self.count}")
@@ -314,6 +313,7 @@ def main():
             print(ray.get(learner.learning_count.remote()))
         memory_size = ray.get(memory.size.remote())
         if memory_size > 2000:
+            learn = learner.update_network.remote(memory)
             ray.get(learn)
 
 main()
