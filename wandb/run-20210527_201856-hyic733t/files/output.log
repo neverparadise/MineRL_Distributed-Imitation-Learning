@@ -1,1 +1,0 @@
-TypeError: Actor methods cannot be called directly. Instead of running 'object.add()', try 'object.add.remote()'.

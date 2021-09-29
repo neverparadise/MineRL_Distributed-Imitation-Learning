@@ -1,2 +1,6 @@
 temp/
 logs/
+wandb/
+/.ipynb_checkpoints/
+/lib_test/
+/runs/

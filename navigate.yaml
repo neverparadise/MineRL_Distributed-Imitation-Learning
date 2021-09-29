@@ -1,0 +1,13 @@
+env_name: 'MineRLNavigateDense-v0'
+gamma: 0.99
+lr: 0.0001
+max_epi: 1000
+agent_num: 2
+num_gpus: 0.4
+num_channels: 4
+buffer_limit: 50000
+L1: 0.9
+pretrain_epochs: 100
+threshold: 100
+batch_size: 32
+seq_len: 10

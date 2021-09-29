@@ -1,13 +1,10 @@
 import numpy
-
-
 # SumTree
 # a binary tree data structure where the parent’s value is the sum of its children
 class SumTree:
     write = 0
 
     def __init__(self, capacity):
-
         """
         self.capacity : 원소의 총 개수
         self.tree : capacity * 2 - 1로 트리를 만듬. 왜? 인덱스가 2의배수로 늘어나기 때문
@@ -73,7 +70,6 @@ class SumTree:
 
         self.tree[idx] = p
         self._propagate(idx, change)
-
     # get priority and sample
     def get(self, s):
         idx = self._retrieve(0, s)
