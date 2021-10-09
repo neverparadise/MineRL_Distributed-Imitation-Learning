@@ -26,7 +26,7 @@ LR = args['lr']
 root_path = os.curdir
 model_path = root_path + '/trained_model/'
 
-writer = SummaryWriter('runs/a3c/')
+writer = SummaryWriter('runs/apex/')
 
 
 @ray.remote
@@ -43,7 +43,7 @@ class ParameterServer:
 
 @ray.remote(num_gpus=0.2)
 class Actor:
-    def __init__(self, learner, param_server, actor_idx, epsilon, num_channels=3, num_actions=19, ):
+    def __init__(self, learner, param_server, actor_idx, epsilon, num_channels=3, num_actions=19):
         # environment initialization
         import gym
         import minerl
@@ -63,9 +63,9 @@ class Actor:
 
         self.param_server = param_server
         self.epi_counter = 0
-        self.max_epi = 1000
+        self.max_epi = 100
         self.n_step = 4
-        self.update_period = 10
+        self.update_period = 4
         self.gamma = 0.99
 
         # exploring info
@@ -284,7 +284,7 @@ class Learner:
         self.learner_target_network.load_state_dict(self.learner_network.state_dict())
         print("leaner_target_network updated")
 
-def main():
+def run():
     ray.init()
     policy_net = DQN(num_channels=4, num_actions=19)
     target_net = DQN(num_channels=4, num_actions=19)
@@ -305,9 +305,9 @@ def main():
 
     actor_list = [Actor.remote(learner, param_server, i, epsilon, num_channels, num_actions) for i in range(num_actors)]
     explore = [actor.explore.remote(learner, memory) for actor in actor_list]
-    ray.get(explore)
+    #ray.get(explore)
     learn = learner.update_network.remote(memory)
-    ray.get(learn)
+    #ray.get(learn)
     # while (actor.episode < 100)
     # print(f"learning count : {self.count}")
     # while ray.get(learner.learning_count.remote()) < 10000000:
@@ -318,4 +318,4 @@ def main():
     #         learn = learner.update_network.remote(memory)
     #         ray.get(learn)
 
-main()
+run()
