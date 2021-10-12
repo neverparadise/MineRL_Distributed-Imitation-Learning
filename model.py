@@ -30,8 +30,6 @@ class DQN(nn.Module):
         self.head = nn.Linear(linear_input_size, self.num_actions)
 
     def forward(self, x):
-        if(len(x.shape) < 4):
-            x = x.unsqueeze(0).to(device=device)
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.bn2(self.conv2(x)))
         x = F.relu(self.bn3(self.conv3(x)))
@@ -76,8 +74,6 @@ class DRQN(nn.Module):
         self.head = nn.Linear(self.gru_h_dim, self.num_actions)
 
     def forward(self, x, hidden):
-        if(len(x.shape) < 4):
-            x = x.unsqueeze(0).to(device=device)
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.bn2(self.conv2(x)))
         x = F.relu(self.bn3(self.conv3(x)))
