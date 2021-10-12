@@ -1,0 +1,13 @@
+env_name: 'MineRLTreechop-v0'
+gamma: 0.99
+lr: 0.0001
+max_epi: 100
+agent_num: 3
+num_gpus: 0.4
+num_channels: 3
+buffer_limit: 50000
+L1: 0.9
+pretrain_epochs: 100
+threshold: 80
+batch_size: 128
+seq_len: 20

@@ -147,7 +147,7 @@ class RemoteMemory:  # stored as ( s, a, r, s_, n_rewards ) in SumTree
 
 def append_sample(memory, model, target_model, state, action, reward, next_state, done, n_rewards=None):
     # Caluclating Priority (TD Error)
-    target = model(state).data
+    target = model(state).data.cpu()
     old_val = target[0][action].cpu()
     target_val = target_model(next_state.float()).data.cpu()
     if done:

@@ -75,9 +75,9 @@ def train_dqn(policy_net, target_net, demos, batch_size, optimizer):
     # optimization step and logging
     optimizer.zero_grad()
     loss.backward()
-    torch.nn.utils.clip_grad_norm(policy_net.parameters(), 100)
     optimizer.step()
     return loss
 
 
 def train_drqn():
+    pass

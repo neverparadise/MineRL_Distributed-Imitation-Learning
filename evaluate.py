@@ -28,7 +28,7 @@ model_path = root_path + '/trained_model/'
 
 writer = SummaryWriter('runs/apex/test')
 
-@ray.remote(num_gpus=0.3)
+@ray.remote(num_gpus=0.25)
 class Testor:
     def __init__(self, model_dict, idx, num_channels=3, num_actions=19):
         import gym
@@ -61,8 +61,13 @@ class Testor:
             while not done:
                 steps += 1
                 total_steps += 1
-                action_index = self.actor_network.sample_action(state, self.epsilon)
+                action_tensor = self.testor_network.forward(state)
+                print(action_tensor)
+                action_index = torch.argmax(action_tensor).item()
+                print(action_index)
+
                 action = make_19action(self.env, action_index)
+                #print(action)
                 obs_prime, reward, done, info = self.env.step(action)
                 total_reward += reward
                 state_prime = converter(ENV_NAME, obs_prime).cuda()
@@ -73,11 +78,12 @@ class Testor:
                     self.writer.add_scalar('Rewards/test', total_reward, num_epi)
                     break
 
-def test():
+def evaluate():
     ray.init()
-    learner_net = DQN(num_channels=3, num_actions=19)
-    model_name = model_path + 'apex_dqfd_learner2'
+    model_name = model_path + 'pre_trained_dqn.pth'
     model_dict = torch.load(model_name)
-    testor_list = [Testor.remote(model_dict, idx, 3, 19) for idx in range(3)]
-    result = [testor.remote.explore() for testor in testor_list]
+    testor_list = [Testor.remote(model_dict, idx, num_channels, 19) for idx in range(2)]
+    result = [testor.explore.remote() for testor in testor_list]
     ray.get(result)
+
+evaluate()

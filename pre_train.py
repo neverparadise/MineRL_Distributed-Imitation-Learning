@@ -1,9 +1,10 @@
 from model import *
 from utils import *
-from replay_buffer import *
+from replay_buffer import Memory, RemoteMemory
 import argparse
 import os
 import yaml
+import pytest
 
 #하이퍼 파라미터
 with open('navigate.yaml') as f:
@@ -33,7 +34,77 @@ seq_len = args['seq_len']
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model_path = os.curdir + '/trained_model/'
 
-def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, model_name='pre_trained_drqn'):
+def margin_loss(q_value, action, demo, weigths):
+    ae = F.one_hot(action, num_classes=19)
+    zero_indices = (ae == 0)
+    one_indices = (ae == 1)
+    ae[zero_indices] = 1
+    ae[one_indices] = 0
+    ae = ae.to(float)
+    max_value = torch.max(q_value + ae, axis=1)
+
+    ae = F.one_hot(action, num_classes=19)
+    ae = ae.to(float)
+
+    J_e = torch.abs(torch.sum(q_value * ae,axis=1) - max_value.values)
+    J_e = torch.mean(J_e * weigths * demo)
+    return J_e
+
+def train_dqn(policy_net, target_net, memory, batch_size, optimizer):
+    batch, idxs, is_weights = memory.sample(batch_size)
+    state_list = []
+    action_list = []
+    reward_list = []
+    next_state_list = []
+    done_mask_list = []
+    n_rewards_list = []
+
+    for _, transition in enumerate(batch):
+        s, a, r, s_prime, done_mask, n_rewards = transition
+        state_list.append(s)
+        action_list.append([a])
+        reward_list.append([r])
+        next_state_list.append(s_prime)
+        done_mask_list.append([done_mask])
+        n_rewards_list.append([n_rewards])
+
+    s = torch.stack(state_list).float().to(device)
+    a = torch.tensor(action_list, dtype=torch.int64).to(device)
+    r = torch.tensor(reward_list).to(device)
+    s_prime = torch.stack(next_state_list).float().to(device)
+    done_mask = torch.tensor(done_mask_list).float().to(device)
+    nr = torch.tensor(n_rewards_list).to(device)
+
+
+    q_vals = policy_net(s)
+    state_action_values = q_vals.gather(1, a)
+
+    # comparing the q values to the values expected using the next states and reward
+    next_state_values = target_net(s_prime).max(1)[0].unsqueeze(1)
+    target = r + (next_state_values * gamma) * done_mask
+
+    # calculating the q loss, n-step return lossm supervised_loss
+    is_weights = torch.FloatTensor(is_weights).to(device)
+    q_loss = (is_weights * F.mse_loss(state_action_values, target)).mean()
+    n_step_loss = (state_action_values.max(1)[0] + nr).mean()
+    supervised_loss = margin_loss(q_vals, a, 1, 1)
+
+    loss = q_loss + supervised_loss + n_step_loss + F.l1_loss(state_action_values, target)
+
+    errors = torch.abs(state_action_values - target).data.cpu()
+    errors = errors.numpy()
+    # update priority
+    for i in range(batch_size):
+        idx = idxs[i]
+        memory.update(idx, errors[i])
+    # optimization step and logging
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    return loss
+
+def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer):
+    model_name = 'pre_trained_dqn.pth'
     gamma = args['gamma']
     num_epochs = args['pretrain_epochs']
     threshold = args['threshold']
@@ -41,14 +112,19 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, model_nam
     seq_len = args['seq_len']
 
     # Data loading
+    os.environ['MINERL_DATA_ROOT'] = '/home/neverparadise/MineRL_DATA/data_texture_0_low_res'
     data = minerl.data.make(env_name)
     print("data loading sucess")
     demo_num = 0
     for s_batch, a_batch, r_batch, ns_batch, d_batch in data.batch_iter(num_epochs=num_epochs, batch_size=batch_size,
                                                                         seq_len=seq_len):
         demo_num += 1
-        print(demo_num)
-        print(r_batch.sum())
+        if demo_num % 10 == 0:
+            print(f"demo_num : {demo_num}")
+            print(f"r sum : {r_batch.sum()}")
+
+        if demo_num % 500 == 0:
+            torch.save(policy_net.state_dict(), model_path + str(demo_num) + model_name)
         if r_batch.sum() < threshold:
             continue
         """
@@ -92,7 +168,7 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, model_nam
 
                 camera_thresholds = (abs(va) + abs(ha)) / 2.0
                 # 카메라를 움직이는 경우
-                action_index = None
+                action_index = 18
                 if (camera_thresholds > 2.5):
                     # camera = [0, -5]
                     if abs(va) < abs(ha) and ha < 0:
@@ -163,8 +239,12 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, model_nam
                         action_index = 18
 
                 a_index = torch.LongTensor([action_index]).cpu()
-                curr_obs = converter2(s_batch['pov'][i][j]).float().cpu()
-                _obs = converter2(ns_batch['pov'][i][j]).float().cpu()
+                if env_name == 'MineRLTreechop-v0':
+                    curr_obs = converter_for_pretrain(env_name, s_batch['pov'][i][j]).float().cpu()
+                    _obs = converter_for_pretrain(env_name, ns_batch['pov'][i][j]).float().cpu()
+                else:
+                    curr_obs = converter_for_pretrain(env_name, s_batch['pov'][i][j], s_batch['compassAngle'][i][j]).float().cpu()
+                    _obs = converter_for_pretrain(env_name, ns_batch['pov'][i][j], ns_batch['compassAngle'][i][j]).float().cpu()
                 _reward = torch.FloatTensor([r_batch[i][j]]).cpu()
                 _done = d_batch[i][j]  # .astype(int)
 
@@ -191,8 +271,7 @@ def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer, model_nam
         # if rep_buffer.size() > rep_buffer.buffer_limit:
         #    rep_buffer.buffer.popleft()
         print('Parse finished. {} expert samples added.'.format(parse_ts))
-        train_dqn(policy_net, target_net, rep_buffer, 256, optimizer)
-        torch.save(policy_net.state_dict(), model_path + model_name)
+        train_dqn(policy_net, target_net, rep_buffer, batch_size, optimizer)
         if demo_num % 5 == 0 and demo_num != 0:
             # 특정 반복 수가 되면 타겟 네트워크도 업데이트
             print("target network updated")
@@ -209,11 +288,14 @@ def load(model, dir=None):
     model.eval()
 
 def main():
-    policy_net = DRQN(num_channels=num_channels, num_actions=19).to(device=device)
-    target_net = DRQN(num_channels=num_channels, num_actions=19).to(device=device)
+    policy_net = DQN(num_channels=num_channels, num_actions=19).to(device=device)
+    target_net = DQN(num_channels=num_channels, num_actions=19).to(device=device)
     target_net.load_state_dict(policy_net.state_dict())
     memory = Memory(50000)
     optimizer = optim.Adam(policy_net.parameters(), lr=learning_rate, weight_decay=1e-5)
     print("pre_train start")
-    pre_train(memory, policy_net, target_net, optimizer, **config)
+    model_name = 'pre_trained_dqn'
+    pre_train(env_name, memory, policy_net, target_net, optimizer)
     print("pre_train finished")
+
+main()
