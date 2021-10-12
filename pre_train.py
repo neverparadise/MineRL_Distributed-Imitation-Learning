@@ -59,49 +59,42 @@ def train_dqn(policy_net, target_net, memory, batch_size, optimizer):
     done_mask_list = []
     n_rewards_list = []
 
-    for _, transition in enumerate(batch):
+    for i, transition in enumerate(batch):
         s, a, r, s_prime, done_mask, n_rewards = transition
-        state_list.append(s)
-        action_list.append([a])
-        reward_list.append([r])
-        next_state_list.append(s_prime)
-        done_mask_list.append([done_mask])
-        n_rewards_list.append([n_rewards])
-
-    s = torch.stack(state_list).float().to(device)
-    a = torch.tensor(action_list, dtype=torch.int64).to(device)
-    r = torch.tensor(reward_list).to(device)
-    s_prime = torch.stack(next_state_list).float().to(device)
-    done_mask = torch.tensor(done_mask_list).float().to(device)
-    nr = torch.tensor(n_rewards_list).to(device)
+        s = torch.tensor(s).float().to(device)
+        a = torch.tensor([a], dtype=torch.int64).to(device)
+        r = torch.tensor([r]).to(device)
+        s_prime = torch.tensor(s_prime).float().to(device)
+        done_mask = torch.tensor(done_mask).float().to(device)
+        nr = torch.tensor(n_rewards).to(device)
 
 
-    q_vals = policy_net(s)
-    state_action_values = q_vals.gather(1, a)
+        q_vals = policy_net(s)
+        print(q_vals)
+        print(q_vals.shape)
+        state_action_values = q_vals.gather(1, a)
 
-    # comparing the q values to the values expected using the next states and reward
-    next_state_values = target_net(s_prime).max(1)[0].unsqueeze(1)
-    target = r + (next_state_values * gamma) * done_mask
+        # comparing the q values to the values expected using the next states and reward
+        next_state_values = target_net(s_prime).max(1)[0].unsqueeze(1)
+        target = r + (next_state_values * gamma) * done_mask
 
-    # calculating the q loss, n-step return lossm supervised_loss
-    is_weights = torch.FloatTensor(is_weights).to(device)
-    q_loss = (is_weights * F.mse_loss(state_action_values, target)).mean()
-    n_step_loss = (state_action_values.max(1)[0] + nr).mean()
-    supervised_loss = margin_loss(q_vals, a, 1, 1)
+        # calculating the q loss, n-step return lossm supervised_loss
+        is_weight = torch.FloatTensor(is_weights[i]).to(device)
+        q_loss = (is_weight * F.mse_loss(state_action_values, target)).mean()
+        n_step_loss = (state_action_values.max(1)[0] + nr).mean()
+        supervised_loss = margin_loss(q_vals, a, 1, 1)
 
-    loss = q_loss + supervised_loss + n_step_loss + F.l1_loss(state_action_values, target)
+        loss = q_loss + supervised_loss + n_step_loss + F.l1_loss(state_action_values, target)
 
-    errors = torch.abs(state_action_values - target).data.cpu()
-    errors = errors.numpy()
-    # update priority
-    for i in range(batch_size):
+        errors = torch.abs(state_action_values - target).data.cpu()
+        errors = errors.numpy()
+        # update priority
         idx = idxs[i]
         memory.update(idx, errors[i])
-    # optimization step and logging
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-    return loss
+        # optimization step and logging
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
 def pre_train(env_name, rep_buffer, policy_net, target_net, optimizer):
     model_name = 'pre_trained_dqn.pth'
