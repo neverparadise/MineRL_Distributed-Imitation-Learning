@@ -4,6 +4,7 @@ import torch
 import ray
 import numpy as np
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class ReplayBuffer():
     def __init__(self, buffer_limit):
@@ -170,3 +171,89 @@ def append_sample(memory, model, target_model, state, action, reward, next_state
             memory.add.remote(error, (state, action, reward, next_state, done, n_rewards))
 
 # 여기 있으면 안된다. actor에 있거나 util에 있어야 할듯.
+
+import sys
+from typing import Dict, List, Tuple
+
+class EpisodeMemory():
+    def __init__(self, random_update=False,
+                 max_epi_num=100, max_epi_len=500,
+                 batch_size=1, n_step=None):
+        self.random_update = random_update
+        self.max_epi_num = max_epi_num
+        self.max_epi_len = max_epi_len
+        self.batch_size = batch_size
+        self.n_step = n_step
+
+        if (random_update is False) and self.batch_size > 1:
+            sys.exit('It is recommend to use 1 batch for sequential update, \
+            if you want, erase this code block and modify code')
+
+        self.memory = deque(maxlen=self.max_epi_len)
+
+    def put(self, episode):
+        self.memory.append(episode)
+
+    def sample(self):
+        sampled_buffer = []
+
+        if self.random_update:
+            sampled_episodes = random.sample(self.memory, self.batch_size)
+            flag = True
+            min_step = self.max_epi_len
+
+            for i, episode in enumerate(sampled_episodes):
+                min_step = min(min_step, len(episode))
+
+            for i, episode in enumerate(sampled_episodes):
+                if min_step > self.n_step: #
+                    idx = np.random.randint(0, len(episode)-self.n_step+1)
+                    sample = episode.sample(random_update=self.random_update, lookup_step=self.n_step, idx=idx)
+                    sampled_buffer.append(sample)
+                else:
+                    idx = np.random.randint(0, len(episode)-min_step+1)
+                    sample = episode.sample(random_update=self.random_update, lookup_step=min_step, idx=idx)
+                    sampled_buffer.append(sample)
+
+        else:
+            idx = np.random.randint(0, len(self.memory))
+            sampled_buffer.append(self.memory[idx].sample(random_update=self.random_update))
+
+        return sampled_buffer, len(sampled_buffer[0]['obs'])
+
+    def __len__(self):
+        return len(self.memory)
+
+class EpisodeBuffer:
+    def __init__(self):
+        self.obs = []
+        self.actions = []
+        self.rewards = []
+        self.next_obs = []
+        self.dones = []
+
+    def put(self, transition):
+        self.obs.append(transition[0]) # 1, 4, 64, 64
+        self.actions.append(transition[1])
+        self.rewards.append(transition[2])
+        self.next_obs.append(transition[3])
+        self.dones.append(transition[4])
+
+    def sample(self, random_update=False, lookup_step=None, idx=None):
+        obs = torch.stack(self.obs).to(device).float() # [seq, batch, 4, 64, 64]
+        action = torch.stack(self.actions).to(device) # [seq, batch, 1]
+        reward = torch.stack(self.rewards).to(device).float() # [seq, batch, 1]
+        next_obs = torch.stack(self.next_obs).to(device).float() # [seq, batch, 1]
+        done = torch.stack(self.dones).to(device) # [seq, batch, 11]
+
+        if random_update:
+            obs = obs[idx:idx+lookup_step]
+            action = action[idx:idx+lookup_step]
+            reward = reward[idx:idx+lookup_step]
+            next_obs = next_obs[idx:idx+lookup_step]
+            done = done[idx:idx+lookup_step]
+
+        return dict(obs=obs, acts=action, rews=reward, next_obs=next_obs, done=done)
+
+    def __len__(self) -> int:
+        return len(self.obs)

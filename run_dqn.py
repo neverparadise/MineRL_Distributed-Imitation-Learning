@@ -31,13 +31,13 @@ writer = SummaryWriter('runs/dqn/')
 def update_network(policy_net, target_net, memory, batch_size, optimizer, total_steps):
     batch, idxs, is_weights = memory.sample(batch_size)
     for i, transition in enumerate(batch):
-        s, a, r, s_prime, done_mask, n_rewards = transition
+        print(transition)
+        s, a, r, s_prime, done_mask = transition
         s = s.float().to(device)
         a = torch.tensor([a], dtype=torch.int64).to(device)
         r = torch.tensor([r]).to(device)
         s_prime = s_prime.float().to(device)
         done_mask = torch.tensor(done_mask).float().to(device)
-        nr = torch.tensor(n_rewards).to(device)
 
         q_vals = policy_net(s)
         a = a.unsqueeze(0)
@@ -50,9 +50,6 @@ def update_network(policy_net, target_net, memory, batch_size, optimizer, total_
         # calculating the q loss, n-step return lossm supervised_loss
         is_weight = torch.FloatTensor(is_weights).to(device)
         q_loss = (is_weight[i].detach() * F.l1_loss(state_action_values, target)).mean()
-        n_step_loss = (state_action_values.max(1)[0] + nr).mean()
-
-        loss = q_loss + n_step_loss
 
         errors = torch.abs(state_action_values - target).data.cpu()
         errors = errors.numpy()
@@ -61,9 +58,9 @@ def update_network(policy_net, target_net, memory, batch_size, optimizer, total_
         memory.update(idx, errors)
         # optimization step and logging
         optimizer.zero_grad()
-        loss.backward()
+        q_loss.backward()
         optimizer.step()
-        writer.add_scalar('Loss/train', loss, total_steps)
+        writer.add_scalar('Loss/train', q_loss, total_steps)
 
 def update_target(policy_net, target_net):
     target_net.load_state_dict(policy_net.state_dict())
@@ -75,6 +72,7 @@ def run():
     optimizer =  optim.Adam(policy_net.parameters(), LR)
     memory = Memory(50000)
     env = gym.make(ENV_NAME)
+    env.make_interactive(port=6666, realtime=False)
     max_epi = 100
     n_step = 2
     update_period = 10
@@ -95,14 +93,6 @@ def run():
         if epsilon > endEpsilon:
             epsilon -= stepDrop
 
-        n_step_state_buffer = deque(maxlen=n_step)
-        n_step_action_buffer = deque(maxlen=n_step)
-        n_step_reward_buffer = deque(maxlen=n_step)
-        n_step_n_rewards_buffer = deque(maxlen=n_step)
-        n_step_next_state_buffer = deque(maxlen=n_step)
-        n_step_done_buffer = deque(maxlen=n_step)
-        gamma_list = [gamma ** i for i in range(n_step)]
-
         while not done:
             steps += 1
             total_steps += 1
@@ -110,31 +100,9 @@ def run():
             action_index = a_out
             action = make_19action(env, action_index)
             obs_prime, reward, done, info = env.step(action)
+
             total_reward += reward
-            state_prime = converter(ENV_NAME, obs_prime).cuda()
 
-            # put transition in local buffer
-            n_step_state_buffer.append(state)
-            n_step_action_buffer.append(action_index)
-            n_step_reward_buffer.append(reward)
-            n_step_next_state_buffer.append(state_prime)
-            n_step_done_buffer.append(done)
-            n_rewards = sum([gamma * reward for gamma, reward in zip(gamma_list, n_step_reward_buffer)])
-            n_step_n_rewards_buffer.append(n_rewards)
-
-            if (len(n_step_state_buffer) >= n_step):
-                # Compute Priorities
-                for i in range(n_step):
-                    append_sample(memory, policy_net, target_net,
-                                       n_step_state_buffer[i],
-                                       n_step_action_buffer[i],
-                                       n_step_reward_buffer[i],
-                                       n_step_next_state_buffer[i],
-                                       n_step_done_buffer[i],
-                                       n_step_n_rewards_buffer[i])
-                    if (n_step_done_buffer[i]):
-                        break
-            state = state_prime
 
             if done:
                 print("%d episode is done" % num_epi)
@@ -142,10 +110,17 @@ def run():
                 writer.add_scalar('Rewards/train', total_reward, num_epi)
                 break
 
+            state_prime = converter(ENV_NAME, obs_prime).cuda()
+            append_sample(memory, policy_net, target_net, state, action_index,
+                          reward, state_prime, done)
+            state = state_prime
+
             if memory.size() > 1000:
-                update_network(policy_net, target_net, memory, 64, optimizer, total_steps)
+                update_network(policy_net, target_net, memory, 2, optimizer, total_steps)
 
             if total_steps % 2000 == 0:
                 update_target(policy_net, target_net)
+
+
 
 run()

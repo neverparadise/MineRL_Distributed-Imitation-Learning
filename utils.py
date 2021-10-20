@@ -18,6 +18,24 @@ with open('navigate.yaml') as f:
     args = yaml.load(f, Loader=yaml.FullLoader)
 env_name = args['env_name']
 
+def make_6action(env, action_index):
+    action = env.action_space.noop()
+    if action_index == 0:
+        action['forward'] = 1
+    elif action_index == 1:
+        action['jump'] = 1
+    elif action_index == 2:
+        action['camera'] = [0, -5]
+    elif action_index == 3:
+        action['camera'] = [0, 5]
+    elif action_index == 4:
+        action['camera'] = [-5, 0]
+    elif action_index == 5:
+        action['camera'] = [5, 0]
+
+    return action
+
+
 def make_19action(env, action_index):
     # Action들을 정의
     action = env.action_space.noop()
@@ -130,13 +148,17 @@ def converter(env_name, observation):
         obs = np.concatenate([obs, compass_channel], axis=-1)
         obs = torch.from_numpy(obs)
         obs = obs.permute(2, 0, 1)
-        return obs.float()
+        if(len(obs.shape) < 4):
+            obs = obs.unsqueeze(0).to(device=device)
+        return obs.float() # return (1, 4, 64, 64)
     else:
         obs = observation['pov']
         obs = obs / 255.0
         obs = torch.from_numpy(obs)
         obs = obs.permute(2, 0, 1)
-        return obs.float()
+        if(len(obs.shape) < 4):
+            obs = obs.unsqueeze(0).to(device=device)
+        return obs.float() # return (1, 4, 64, 64)
 
 def converter_for_pretrain(env_name, pov, compassAngle=None):
     if (env_name == 'MineRLNavigateDense-v0' or

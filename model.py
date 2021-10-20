@@ -30,8 +30,6 @@ class DQN(nn.Module):
         self.head = nn.Linear(linear_input_size, self.num_actions)
 
     def forward(self, x):
-        if(len(x.shape) < 4):
-            x = x.unsqueeze(0).to(device=device)
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.bn2(self.conv2(x)))
         x = F.relu(self.bn3(self.conv3(x)))
@@ -50,7 +48,8 @@ class DQN(nn.Module):
             return torch.argmax(out)
 
 class DRQN(nn.Module):
-    def __init__(self, num_channels=3 ,num_actions=19):
+    def __init__(self, num_channels=3 ,num_actions=19,
+                 batch_first=True):
         self.num_actions = num_actions
         super(DRQN, self).__init__()
         self.conv1 = nn.Conv2d(num_channels, 32, kernel_size=8, stride=4)
@@ -72,12 +71,13 @@ class DRQN(nn.Module):
         self.gru_h_dim = 64  # output dimension of GRU
         self.gru_N_layer = 1  # number of layers of GRU
         self.Conv2GRU = nn.Linear(linear_input_size, self.gru_i_dim)
-        self.gru = nn.GRU(input_size=self.gru_i_dim, hidden_size=self.gru_h_dim, num_layers=self.gru_N_layer)
+        self.gru = nn.GRU(input_size=self.gru_i_dim,
+                          hidden_size=self.gru_h_dim,
+                          num_layers=self.gru_N_layer,
+                          batch_first=batch_first)
         self.head = nn.Linear(self.gru_h_dim, self.num_actions)
 
     def forward(self, x, hidden):
-        if(len(x.shape) < 4):
-            x = x.unsqueeze(0).to(device=device)
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.relu(self.bn2(self.conv2(x)))
         x = F.relu(self.bn3(self.conv3(x)))
@@ -85,18 +85,24 @@ class DRQN(nn.Module):
         x = x.view(x.size(0), -1)
         x = F.relu(self.Conv2GRU(x))
         x = x.unsqueeze(0)  #
-        x, new_hidden = self.lstm(x, hidden)
+        x, new_hidden = self.gru(x, hidden)
         x = F.relu(self.head(x))
         return x, new_hidden
 
-    def init_hidden_state(self, batch_size, training=None):
+    def init_hidden_state(self, batch_first, batch_size, training=None):
 
         assert training is not None, "training step parameter should be dtermined"
 
-        if training is True:
-            return torch.zeros([1, batch_size, self.gru_h_dim], device=device)
+        if not batch_first:
+            if training is True:
+                return torch.zeros([1, batch_size, self.gru_h_dim], device=device)
+            else:
+                return torch.zeros([1, 1, self.gru_h_dim], device=device)
         else:
-            return torch.zeros([1, 1, self.gru_h_dim], device=device)
+            if training is True:
+                return torch.zeros([batch_size, 1, self.gru_h_dim], device=device)
+            else:
+                return torch.zeros([1, 1, self.gru_h_dim], device=device)
 
     def sample_action(self, obs, epsilon, hidden):
         out, hidden = self.forward(obs, hidden)
