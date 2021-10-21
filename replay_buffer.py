@@ -4,7 +4,7 @@ import torch
 import ray
 import numpy as np
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0")
 
 class ReplayBuffer():
     def __init__(self, buffer_limit):
@@ -224,6 +224,8 @@ class EpisodeMemory():
     def __len__(self):
         return len(self.memory)
 
+
+
 class EpisodeBuffer:
     def __init__(self):
         self.obs = []
@@ -231,20 +233,21 @@ class EpisodeBuffer:
         self.rewards = []
         self.next_obs = []
         self.dones = []
+        self.device = torch.device("cuda:0")
 
     def put(self, transition):
         self.obs.append(transition[0]) # 1, 4, 64, 64
-        self.actions.append(transition[1])
-        self.rewards.append(transition[2])
+        self.actions.append(transition[1]) # [1, 1]
+        self.rewards.append(transition[2]) # [1, 1]
         self.next_obs.append(transition[3])
-        self.dones.append(transition[4])
+        self.dones.append(transition[4]) # [1, 1]
 
     def sample(self, random_update=False, lookup_step=None, idx=None):
-        obs = torch.stack(self.obs).to(device).float() # [seq, batch, 4, 64, 64]
-        action = torch.stack(self.actions).to(device) # [seq, batch, 1]
-        reward = torch.stack(self.rewards).to(device).float() # [seq, batch, 1]
-        next_obs = torch.stack(self.next_obs).to(device).float() # [seq, batch, 1]
-        done = torch.stack(self.dones).to(device) # [seq, batch, 11]
+        obs = torch.stack(self.obs).to(self.device).float() # [seq, 1, 4, 64, 64]
+        action = torch.stack(self.actions).to(self.device) # [seq, 1, 1]
+        reward = torch.stack(self.rewards).to(self.device).float() # [seq, 1, 1]
+        next_obs = torch.stack(self.next_obs).to(self.device).float() # [seq, 1, 1]
+        done = torch.stack(self.dones).to(self.device) # [seq, 1, 1]
 
         if random_update:
             obs = obs[idx:idx+lookup_step]

@@ -141,7 +141,7 @@ def converter(env_name, observation):
             env_name == 'MineRLNavigate-v0'):
         obs = observation['pov']
         obs = obs / 255.0  # [64, 64, 3]
-        compass_angle = observation['compassAngle']
+        compass_angle = observation['compass']['angle']
         compass_angle_scale = 180
         compass_scaled = compass_angle / compass_angle_scale
         compass_channel = np.ones(shape=list(obs.shape[:-1]) + [1], dtype=obs.dtype) * compass_scaled
